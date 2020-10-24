@@ -9,7 +9,7 @@
           />
         </v-col>
       </v-row>
-      <v-row v-if="!currentClientId">
+      <v-row justify="center" v-if="!currentClientId">
         <v-col sm="4">
           <v-btn color="primary" @click="newFormDialog = true" block>
               Open New Account
