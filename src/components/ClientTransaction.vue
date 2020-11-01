@@ -40,8 +40,8 @@ export default {
       rules: {
         amount: value => value >= 0 || 'Insuficient Amount',
         balance: value => {
-          if (this.formData.type === 'Withdraw') {
-            return this.clientDetail.balance > this.formData.amount || 'Insuficient Amount'
+          if (this.formData.type !== 'Deposit') {
+            return (this.clientDetail.balance > this.formData.amount) || 'Insuficient Amount'
           }
         }
       }
@@ -50,24 +50,21 @@ export default {
   computed: {
     ...mapState([
       'currentAgentId',
-      'currentClientId',
       'clientDetail'
     ])
   },
   methods: {
     ...mapActions([
-      'processTransaction',
-      'fetchClientActivities'
+      'processTransaction'
     ]),
     handleSubmit () {
       const payload = {
         type: this.formData.type,
         amount: this.formData.amount,
-        clientId: this.currentClientId,
-        agentId: (this.currentAgentId) ? this.currentAgentId : this.currentClientId
+        clientId: this.clientDetail.accountNumber,
+        agentId: (this.currentAgentId) ? this.currentAgentId : this.clientDetail.accountNumber
       }
       this.processTransaction(payload)
-      this.fetchClientActivities(this.currentClientId)
       this.formData = {
         type: '',
         amount: 0

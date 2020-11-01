@@ -124,7 +124,7 @@ export default {
           snapShot.forEach(user => {
             if (user.data().password === this.formData.password) {
               this.setClientId(user.id)
-              this.fetchCustomerDetail({ clientId: user.id, password: this.formData.password })
+              this.fetchCustomerDetail(user.id)
               this.$router.push(`/client/${user.id}`)
             } else {
               this.failLogin = true

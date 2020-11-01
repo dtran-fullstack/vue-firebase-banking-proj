@@ -10,6 +10,7 @@ export default {
   },
   setClientDetail (state, clientDetail) {
     if (clientDetail) {
+      // state.clientId = clientDetail.accountNumber
       state.clientDetail = clientDetail
     } else {
       state.currentClientId = ''

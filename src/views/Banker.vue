@@ -2,14 +2,14 @@
   <div v-if="currentAgentId">
     <HeaderBar />
     <v-container >
-      <v-row justify="center" v-if="!currentClientId">
+      <v-row justify="center" v-if="!clientDetail.accountNumber">
         <v-col sm="4">
           <SearchBar
             v-on:select-account = 'selectAccount'
           />
         </v-col>
       </v-row>
-      <v-row justify="center" v-if="!currentClientId">
+      <v-row justify="center" v-if="!clientDetail.accountNumber">
         <v-col sm="4">
           <v-btn color="primary" @click="newFormDialog = true" block>
               Open New Account
@@ -24,7 +24,11 @@
 
       <!-- Open Dialog to Confirm Client When is Selected -->
       <v-row justify="center">
-        <v-dialog v-model="loginDialog" max-width="290">
+        <v-dialog
+          v-model="loginDialog"
+          max-width="290"
+          persistent
+        >
           <v-card>
             <v-card-title> Please Enter password </v-card-title>
             <v-card-text>
@@ -41,7 +45,39 @@
                 text
                 @click="loginDialog = false"
               >
+                Close
+              </v-btn>
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="submitPassword"
+              >
                 Submit
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-row>
+
+      <!-- Open dialog when password is incorrect -->
+      <v-row justify="center">
+        <v-dialog
+          v-model="incorrect"
+          max-width="290"
+          persistent
+        >
+          <v-card>
+            <v-card-title>
+              Incorrect Password
+            </v-card-title>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                @click="incorrect = false"
+                color="blue darken-1"
+                text
+              >
+                Close
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -76,6 +112,7 @@
 </template>
 
 <script>
+import { db } from '@/main'
 import { mapActions, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar'
 import ClientTransaction from '@/components/ClientTransaction'
@@ -87,6 +124,8 @@ import NewClientForm from '@/components/NewClientForm'
 export default {
   data () {
     return {
+      selectedAccount: '',
+      incorrect: false,
       loginDialog: false,
       submitedPassword: '',
       newFormDialog: false
@@ -102,40 +141,39 @@ export default {
   },
   computed: {
     ...mapState([
-      'currentClientId',
       'currentAgentId',
       'clientDetail'
     ])
   },
   methods: {
     ...mapActions([
-      'setClientId',
       'fetchClientAccounts',
       'fetchCustomerDetail',
       'clearClientSession'
     ]),
     selectAccount (uid) {
-      this.setClientId(uid)
+      this.selectedAccount = uid
       this.loginDialog = true
     },
     clearSession () {
-      if (this.currentClientId) {
+      if (this.clientDetail.accountNumber) {
         this.clearClientSession()
       }
     },
     submitNewForm () {
       this.newFormDialog = false
       this.fetchClientAccounts()
-    }
-  },
-  watch: {
-    loginDialog: {
-      handler () {
-        if (this.currentClientId && this.loginDialog === false && this.submitedPassword) {
-          this.fetchCustomerDetail({ clientId: this.currentClientId, password: this.submitedPassword })
-          this.submitedPassword = ''
-        }
+    },
+    async submitPassword () {
+      const snapShot = await db.collection('customer').doc(this.selectedAccount).get()
+      if (snapShot.data().password === this.submitedPassword) {
+        this.fetchCustomerDetail(this.selectedAccount)
+      } else {
+        this.incorrect = true
       }
+      this.loginDialog = false
+      this.submitedPassword = ''
+      this.selectedAccount = ''
     }
   },
   mounted () {

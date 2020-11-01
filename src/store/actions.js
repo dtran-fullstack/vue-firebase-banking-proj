@@ -60,19 +60,17 @@ export default {
     commit('updateStateClientDetail', currentBalance)
   },
 
-  async fetchCustomerDetail ({ commit }, { clientId, password }) {
+  async fetchCustomerDetail ({ commit }, clientId) {
     const client = {}
     const query = db.collection('customer').doc(clientId)
     const customer = await query.get()
-    if (customer.data().password === password) {
-      client.accountNumber = customer.id
-      client.firstName = customer.data().firstName
-      client.lastName = customer.data().lastName
-      client.email = customer.data().email
-      client.phone = customer.data().phone
-      client.type = customer.data().type
-      client.balance = customer.data().balance
-    }
+    client.accountNumber = customer.id
+    client.firstName = customer.data().firstName
+    client.lastName = customer.data().lastName
+    client.email = customer.data().email
+    client.phone = customer.data().phone
+    client.type = customer.data().type
+    client.balance = customer.data().balance
     commit('setClientDetail', client)
   }
 }

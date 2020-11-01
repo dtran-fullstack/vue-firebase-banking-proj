@@ -29,13 +29,12 @@ export default {
   }),
   computed: {
     ...mapState([
-      'currentClientId'
+      'clientDetail'
     ])
   },
   methods: {
     async getActivities () {
-      const query = await db.collection('activity').where('accountNumber', '==', this.currentClientId).orderBy('createdAt')
-      query.onSnapshot(querySnapshot => {
+      await db.collection('activity').where('accountNumber', '==', this.clientDetail.accountNumber).orderBy('createdAt').onSnapshot(querySnapshot => {
         this.activities = []
         querySnapshot.forEach(activity => {
           this.activities.push(activity.data())
